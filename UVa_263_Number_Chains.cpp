@@ -42,7 +42,6 @@ Original number was 444
 0 - 0 = 0
 Chain length 2
 */
-#include <string>
 #include <bits/stdc++.h>
 #include <time.h>
 #define ONLINE_JUDGE
@@ -50,25 +49,20 @@ Chain length 2
 #include <gmock/gmock.h>
 #endif
 
-#define TIME_MEASUREMENT    0
+#define TIME_MEASUREMENT  0
 
 using namespace std;
 
-//  std::reverse(copy.begin(), copy.end());
-
-static inline void get_odered_vector(uint32_t val,vector<uint8_t> &out)
+static inline void get_sorted_vector(uint32_t val,vector<uint8_t> &out)
 {
     while (val)
     {
         out.push_back(val%10);
         val=val/10;
     }
-    sort(out.begin(),out.end());
+    sort(out.begin(),out.end()); //ascending
     return;
 }
-
-
-
 
 static inline uint32_t get_ascending_val(const vector<uint8_t> &in)
 {
@@ -98,20 +92,19 @@ void uva263_unit_resolver()
             break;
         unordered_set <uint32_t> result;
         cout<<"Original number was " << val << endl;
-        int chain_length = 0;
-        // Start measuring time
+        uint32_t chain_length = 0;
     #if TIME_MEASUREMENT
         auto start = chrono::steady_clock::now();
     #endif
         while (1)
         {
-            vector<uint8_t> odered_vector;
-            get_odered_vector(val,odered_vector);
-            val_asc = get_ascending_val(odered_vector);
-            val_dsc = get_descending_val(odered_vector);
+            vector<uint8_t> sorted_vector;
+            chain_length++;
+            get_sorted_vector(val,sorted_vector);
+            val_asc = get_ascending_val(sorted_vector);
+            val_dsc = get_descending_val(sorted_vector);
             val = val_dsc - val_asc;
             cout <<val_dsc<< " - " << val_asc <<" = "<< val <<endl;
-            chain_length++; 
             if(val == 0){;
                 chain_length++;
                 cout <<val << " - " << val << " = 0"<<endl;
