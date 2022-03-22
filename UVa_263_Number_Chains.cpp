@@ -99,6 +99,7 @@ void uva263_unit_resolver()
         while (1)
         {
             vector<uint8_t> sorted_vector;
+            cout << sorted_vector.capacity()<<endl;
             chain_length++;
             get_sorted_vector(val,sorted_vector);
             val_asc = get_ascending_val(sorted_vector);
