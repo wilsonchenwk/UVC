@@ -17,7 +17,6 @@ int solve_uva_problem(istream &is,ostream &os)
     std::string str_val;
     while (getline(is,str_val)) {
         uint32_t line_num = stoi(str_val);
-        std::string str_line;
         vector<pair<char, int>> result(26);
         
         //initial vector of pairs from A to Z
@@ -26,6 +25,7 @@ int solve_uva_problem(istream &is,ostream &os)
 
         while(line_num)
         {
+            std::string str_line;
             getline(is,str_line);
             for(uint32_t i=0;i<str_line.length();i++)
             {
@@ -62,3 +62,34 @@ int main(int argc, char** argv)
 #endif    
 }
 
+
+#ifndef ONLINE_JUDGE
+TEST(uva_test, uva_test1)
+{
+    std::istringstream iss(
+        "3\n"\
+        "This is a test.\n"\
+        "Count me 1 2 3 4 5.\n"\
+        "Wow!!!! Is this question easy?\n"\
+        );
+    std::ostringstream oss;
+
+    solve_uva_problem(iss, oss);
+    EXPECT_EQ(
+                "S 7\n"\
+                "T 6\n"\
+                "I 5\n"\
+                "E 4\n"\
+                "O 3\n"\
+                "A 2\n"\
+                "H 2\n"\
+                "N 2\n"\
+                "U 2\n"\
+                "W 2\n"\
+                "C 1\n"\
+                "M 1\n"\
+                "Q 1\n"\
+                "Y 1\n"\
+                ,oss.str());
+}
+#endif
