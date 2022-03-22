@@ -1,5 +1,5 @@
 #include <bits/stdc++.h>
-#define ONLINE_JUDGE
+// #define ONLINE_JUDGE
 #ifndef ONLINE_JUDGE    
 #include <gmock/gmock.h>
 #endif
@@ -12,41 +12,43 @@ bool comp_cnt_desc_alphabet(const pair<char, int> &a, const pair<char, int> &b)
         ((a.second == b.second) && (a.first < b.first));
 }
 
-int solve_uva_problem(istream &is,ostream &os)
+int solve_uva_problem(std::istream &is,ostream &os)
 {
     std::string str_val;
-    while (getline(is,str_val)) {
-        uint32_t line_num = stoi(str_val);
-        vector<pair<char, int>> result(26);
+    while (std::getline(is,str_val)) {
+        auto line_num = stoi(str_val);
+        std::vector<pair<char, int>> result(26);
         
         //initial vector of pairs from A to Z
-        for(uint8_t i=0;i < 26;i++)
-            result[i] = make_pair(i+'A',0);   
+        for(auto i=0;i < 26;i++)
+            result[i] = std::make_pair(i+'A',0);   
 
         while(line_num)
         {
             std::string str_line;
-            getline(is,str_line);
-            for(uint32_t i=0;i<str_line.length();i++)
+            std::getline(is,str_line);
+            
+            for (const auto &l : str_line) 
             {
-                const char l = str_line[i];
-                if (l>='a' && l<='z')
+                if (l >='a' && l <='z')
                 {
-                    result[l-'a'].second=result[l-'a'].second+1;
+                    result[l-'a'].second ++;
                 }
                 else if (l>='A' && l<='Z')
                 {
-                     result[l-'A'].second=result[l-'A'].second+1;
-                }
+                     result[l-'A'].second++ ;
+                }    
             }
             line_num--;
         }
+        std::sort(result.begin(), result.end(), comp_cnt_desc_alphabet);
 
-
-        sort(result.begin(), result.end(), comp_cnt_desc_alphabet);
-
-        for(auto i=0;i<26 && result[i].second;i++)
-            os<<result[i].first << " " << result[i].second << endl;
+         for (const auto &res : result) 
+         {
+            if(!res.second)
+                break;
+            os<<res.first << " " << res.second << endl;
+         }
        
     }
     return 0;
