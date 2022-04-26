@@ -1,13 +1,65 @@
 #include <bits/stdc++.h>
-// #define ONLINE_JUDGE
+#define ONLINE_JUDGE
 #ifndef ONLINE_JUDGE    
 #include <gmock/gmock.h>
 #endif
 
+#define  HourtoMinutes   60
 
+class Schedule
+{
+public:
+    void add(const std::string &in)
+    {
+        uint32_t from_time,to_time;
+
+        from_time = std::stoi (in.substr(0,2)) * HourtoMinutes; //hour to mins
+        from_time += std::stoi (in.substr(3,2));   
+        to_time = std::stoi (in.substr(6,2))*HourtoMinutes; //hour to mins
+        to_time += std::stoi (in.substr(9,2));
+        vec_schedule.push_back((from_time << 16) | to_time);
+        dirty = 1;
+    }
+
+    std::pair<uint32_t, uint32_t> get_longest_minutes_pair()
+    {
+        if(dirty)
+        {
+            std::sort(vec_schedule.begin(),vec_schedule.end());
+            longest_begin = day_start_minutes;
+            longest_nap = (vec_schedule[0] >> 16) - longest_begin;
+
+            for(uint32_t i =1;i<vec_schedule.size();i++)
+            {
+                uint32_t s_begin = (vec_schedule[i-1] & 0xFFFF);
+                uint32_t nap = (vec_schedule[i] >> 16) - s_begin;
+                if(nap > longest_nap)
+                {
+                    longest_nap = nap;
+                    longest_begin = s_begin;
+                }
+            }
+            uint32_t s_end = vec_schedule.back() & 0xFFFF;
+            uint32_t final_nap  = day_end_minutes -  s_end;
+            if(longest_nap < final_nap){
+                longest_nap = final_nap;
+                longest_begin = s_end;
+            }
+            dirty = 0;
+        }
+        return std::make_pair(longest_begin,longest_nap);
+    }
+
+private:
+    std::vector<uint32_t> vec_schedule;
+    uint32_t longest_nap;
+    uint32_t longest_begin;
+    const uint32_t day_start_minutes = (10*HourtoMinutes);
+    const uint32_t day_end_minutes = (18*HourtoMinutes);
+    int dirty;
+};
 int solve_uva_problem(std::istream &is,std::ostream &os)
 {
-    int n;
     int day_cnt = 1;
     std::string str_val;
     while (std::getline(is,str_val)) {
@@ -15,51 +67,25 @@ int solve_uva_problem(std::istream &is,std::ostream &os)
         if(line_num == 0)
             return 0;
 
-        std::vector<uint32_t> schedule;
+        Schedule p_schedule;
 
         while(line_num--)
         {
             std::string str_line;
             std::getline(is,str_line);
-            uint32_t from_time,to_time;
-
-            from_time = std::stoi (str_line.substr(0,2)) * 60; //hour to mins
-            from_time += std::stoi (str_line.substr(3,2));   
-            to_time = std::stoi (str_line.substr(6,2))*60; //hour to mins
-            to_time += std::stoi (str_line.substr(9,2));
-            schedule.push_back((from_time << 16) | to_time);
+            p_schedule.add(str_line);
         }
-        std::sort(schedule.begin(),schedule.end());
-
-        uint32_t longest_begin = (10*60);
-        uint32_t longest_nap = (schedule[0] >> 16) - (longest_begin);
-
-        for(auto i =1;i<schedule.size();i++)
-        {
-            uint32_t begin = (schedule[i-1] & 0xFFFF);
-            uint32_t nap = (schedule[i] >> 16) - begin;
-            if(nap > longest_nap)
-            {
-                longest_nap = nap;
-                longest_begin = begin;
-            }
-        }
-        uint32_t final_begin = schedule.back() & 0xFFFF;
-        uint32_t final_nap  = (18*60) -  final_begin;
-        if(longest_nap < final_nap){
-            longest_nap = final_nap;
-            longest_begin = final_begin;
-        }
+        std::pair<uint32_t, uint32_t> longest = p_schedule.get_longest_minutes_pair();
         // Day #2: the longest nap starts at 15:00 and will last for 1 hours and 45 minutes.
         // Day #3: the longest nap starts at 17:15 and will last for 45 minutes.
 
         os << "Day #"<<day_cnt++<<": the longest nap starts at ";
-        os << (longest_begin/60) <<":";
-        os << std::setw(2) << std::setfill('0') << (longest_begin%60);
+        os << (longest.first/HourtoMinutes) <<":";
+        os << std::setw(2) << std::setfill('0') << (longest.first%HourtoMinutes);
         os << " and will last for ";
-        if(longest_nap / 60)
-            os << (longest_nap / 60)<<" hours and ";
-        os << (longest_nap % 60)<<" minutes."<<std::endl;
+        if(longest.second / HourtoMinutes)
+            os << (longest.second / HourtoMinutes)<<" hours and ";
+        os << (longest.second  % HourtoMinutes)<<" minutes."<<std::endl;
     }
     return 0;
 }
@@ -74,8 +100,6 @@ int main(int argc, char** argv)
 #endif    
 }
 
-// 17
-// 7 6 60 70 78 44 86 21 7 11 33 44 93 87 68 72 92 
 #ifndef ONLINE_JUDGE
 TEST(uva_test, uva_test1)
 {
