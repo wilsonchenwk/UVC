@@ -29,12 +29,14 @@ four_a_kind,
 straight_flush
 };
 
-std::unordered_map<std::string, int> poker_map = {{"A", 1},{"2", 2},{"3", 3},{"4", 4},{"5", 5},{"6", 6},{"7", 7},\
+std::unordered_map<std::string, int> poker_num_map = {{"A", 1},{"2", 2},{"3", 3},{"4", 4},{"5", 5},{"6", 6},{"7", 7},\
                                             {"8", 8},{"9", 9},{"T", 10},{"J", 11},{"Q", 12},{"K", 13}};
+std::unordered_map<std::string, int> poker_suit_map = {{"C", 0},{"D", 1},{"H", 2},{"S", 3}};
 
-#define P_NUM_INT(str)   poker_map[str.substr(0,1)]
+#define P_NUM_INT(str)   poker_num_map[str.substr(0,1)]
 #define P_NUM_STR(str)   str.substr(0,1)
-#define P_SUIT(str)  str.substr(1,1)
+#define P_SUIT_INT(str)  poker_suit_map[str.substr(1,1)]
+#define P_SUIT_STR(str)  str.substr(1,1)
 class Poker_131
 {
 public:
@@ -106,12 +108,14 @@ private:
     bool check_done;
     HAND_NAME_ENUM find_best_hand(int num) 
     {
-        int conti_cnt = 1 , same_cnt = 1,suit_cnt = 1;
-        int p=0,k3=0,k4=0,s=0,f=0,sf=0;
+        int conti_cnt = 1 , same_cnt = 1,sf_test=1;
+        int p=0,k3=0,k4=0,f=0;
         int pre_diff_num = P_NUM_INT(round_cards[0]);
+        int  suit_cnt[4]={1};
+        bool  suit_on_flush_bit=0;
+        bool  suit_on_straight_bit=0;
         for(int i =1;i<num;i++)
         {
-
 
             if(P_NUM_INT(round_cards[i]) == P_NUM_INT(round_cards[i-1]))
                 same_cnt++;
@@ -130,7 +134,7 @@ private:
                 pre_diff_num = P_NUM_INT(round_cards[i]);
                 if(conti_cnt == 5)
                 {
-                    s++;
+                    suit_on_straight_bit|= (1<<P_SUIT_INT(round_cards[i]));
                     conti_cnt = 1;
                 }
                 
@@ -145,27 +149,31 @@ private:
                 }
                 same_cnt = 1;
             }
-            if(P_SUIT(round_cards[i]) ==  P_SUIT(round_cards[i-1]))
-                suit_cnt++;
-            else
+            if(P_SUIT_STR(round_cards[i]) ==  P_SUIT_STR(round_cards[i-1]))
             {    
-                if(suit_cnt ==5)
-                    f++;
-                suit_cnt=1;
+                suit_cnt[P_SUIT_INT(round_cards[i])] ++;
+                
+
             }
+               
+            if(suit_cnt[P_SUIT_INT(round_cards[i])] ==5)
+                suit_on_straight_bit|= (1<<P_SUIT_INT(round_cards[i]));
+            
         }
         if(conti_cnt == 4 && (P_NUM_STR(round_cards[0]) =="A" &&  P_NUM_STR(round_cards[9])=="K"))
-            s++;     
+        {    
+            suit_on_straight_bit|= (1<<P_SUIT_INT(round_cards[0]));  
+        }
                     
-        if(s && f && is_straight_flush(num))
+        if((suit_on_flush_bit & suit_on_straight_bit) && is_straight_flush(num,suit_on_flush_bit & suit_on_straight_bit))
             return straight_flush;
         if(k4)
             return four_a_kind;
         if(k3 && p)
             return full_house;
-        if(f)
+        if(suit_on_flush_bit)
             return _flush;
-        if(s)
+        if(suit_on_straight_bit)
             return straight;
         if(k3)
             return three_a_kind;
@@ -176,24 +184,11 @@ private:
         else
             return hi_card;              
     }   
-    bool is_straight_flush(int num) 
+    bool is_straight_flush(int num,int bit) 
     {
         int cnt = 1;
-        for(int i =1;i<num && cnt < 5;i++)
-        {
-            if(P_NUM_INT(round_cards[i]) == 1 + P_NUM_INT(round_cards[i-1]))
-                cnt++;
-            else
-            {
-                if(cnt == 4 && (P_NUM_STR(round_cards[0]) =="A" &&  P_NUM_STR(round_cards[i])=="K")){
-                    cnt =5;        
-                }
-                else
-                    cnt = 1;            
-            }
-        }
-        if(cnt == 4 && (P_NUM_STR(round_cards[0]) =="A" &&  P_NUM_STR(round_cards[num-1])=="K"))
-            cnt =5;
+
+ 
         if(cnt == 5)
             return true;
         else
